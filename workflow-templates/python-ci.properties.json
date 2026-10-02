@@ -1,0 +1,8 @@
+{
+  "name": "Python CI",
+  "description": "Standard Python lint and test workflow for Jasper Delahaije Software & Integraties.",
+  "iconName": "octicon workflow",
+  "categories": [
+    "Python"
+  ]
+}
