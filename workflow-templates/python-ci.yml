@@ -6,7 +6,10 @@ on:
 
 jobs:
   quality:
-    runs-on: ubuntu-latest
+    # PR and unreviewed refs require separate isolated self-hosted execution.
+    runs-on:
+      group: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' && 'default' || 'jd-pr' }}
+      labels: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' && 'jd-ci' || 'jd-pr-isolated' }}
     steps:
       - uses: actions/checkout@v5
       - uses: astral-sh/setup-uv@v10.2.0
@@ -20,7 +23,11 @@ jobs:
       - run: uv run pytest
 
   container:
-    runs-on: ubuntu-latest
+    # OCI builds run on trusted self-hosted jd-builder on main, and the
+    # isolated self-hosted PR runner on unreviewed refs (Podman required).
+    runs-on:
+      group: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' && 'default' || 'jd-pr' }}
+      labels: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' && 'jd-builder' || 'jd-pr-isolated' }}
     steps:
       - uses: actions/checkout@v5
       - run: |
