@@ -65,9 +65,15 @@ need no runner, and a future custom workflow must follow this policy.
   for public fork PRs. Check every new repository's event triggers, permissions,
   network policy, runner labels and ephemeral cleanup before accepting CI.
 
-No organization-level GitHub setting currently proven here can silently
-rewrite an arbitrary future workflow. Treat this template and source
-generation as default controls, and require ongoing audit or a separately
-configured organization ruleset to enforce the policy against ad hoc
-workflows. This policy does **not** claim that every future workflow is already
-compliant.
+**Organization-wide enforceable stop for GitHub-hosted jobs:** GitHub
+provides **Organization Settings → Actions → General → Standard hosted
+runners → Disable for all repositories → Save**. The owner must enable and
+verify this setting; it has not been changed or read through the current
+GitHub connector. Disabling hosted runners prevents a later arbitrary
+`ubuntu-latest` workflow from running on GitHub-hosted capacity, but does
+**not** rewrite that workflow's `runs-on`; incompatible jobs fail until
+corrected. Keep the central template, generated seed and per-repository
+workflow review alongside this organization setting. This policy does **not**
+claim all current branches are merged or future custom workflows automatically
+have working self-hosted routing. See
+[GitHub's organization Actions guidance](https://docs.github.com/en/organizations/managing-organization-settings/disabling-or-limiting-github-actions-for-your-organization).
