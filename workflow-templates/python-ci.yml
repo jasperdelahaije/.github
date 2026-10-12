@@ -1,12 +1,20 @@
-name: Python CI
+name: Python CI (self-hosted only)
 
 on:
   push:
+    branches: [main]
   pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   quality:
-    # PR and unreviewed refs require separate isolated self-hosted execution.
+    # PR / non-main code must never execute on jd-ci or jd-builder.
     runs-on:
       group: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' && 'default' || 'jd-pr' }}
       labels: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' && 'jd-ci' || 'jd-pr-isolated' }}
@@ -23,14 +31,19 @@ jobs:
       - run: uv run pytest
 
   container:
-    # OCI builds run on trusted self-hosted jd-builder on main, and the
-    # isolated self-hosted PR runner on unreviewed refs (Podman required).
-    runs-on:
-      group: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' && 'default' || 'jd-pr' }}
-      labels: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' && 'jd-builder' || 'jd-pr-isolated' }}
+    # Podman image builds may use the trusted builder only after reviewed main.
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: quality
+    runs-on: jd-builder
+    permissions:
+      contents: read
+      packages: read
     steps:
       - uses: actions/checkout@v5
-      - run: |
-          if [ -f Containerfile ]; then
+      - name: Build container locally if a Containerfile exists
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ -f Containerfile ]]; then
             podman build -f Containerfile -t repository:ci .
           fi
