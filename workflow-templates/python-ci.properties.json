@@ -1,6 +1,6 @@
 {
-  "name": "Python CI",
-  "description": "Standard Python lint and test workflow for Jasper Delahaije Software & Integraties.",
+  "name": "Python CI (self-hosted only)",
+  "description": "Self-hosted only: isolated ephemeral jd-pr for pull requests, trusted jd-ci for main checks and jd-builder for main image builds.",
   "iconName": "octicon workflow",
   "categories": [
     "Python"
